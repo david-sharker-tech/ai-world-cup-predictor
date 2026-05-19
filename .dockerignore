@@ -1,0 +1,38 @@
+# 不进镜像
+node_modules
+.next
+.git
+.gitignore
+.env*
+!.env.example
+*.log
+.DS_Store
+
+# 仓库元 / 文档
+README.md
+AGENTS.md
+CLAUDE.md
+.claude
+.cursor
+
+# 本地工具
+.vscode
+.idea
+
+# 临时
+tmp
+.tmp
+.cache
+.stash
+
+# Test 输出
+coverage
+.nyc_output
+
+# Docker 自身
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# 不需要在镜像里(脚本仍在 source 里,如要在容器跑就别 ignore)
+# scripts/  # 留着,以便 `docker compose exec web npx tsx scripts/X.ts` — 但 standalone 镜像无 source,本就跑不了。从 host 跑更顺。

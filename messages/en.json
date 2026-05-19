@@ -1,0 +1,90 @@
+{
+  "site": {
+    "title": "AI FIFA Predictor",
+    "tagline": "Watch 8 top AI models predict the 2026 World Cup — who nails it, who crashes."
+  },
+  "nav": {
+    "home": "Home",
+    "schedule": "Schedule",
+    "leaderboard": "Leaderboard",
+    "back_to_schedule": "← Schedule"
+  },
+  "home": {
+    "today_matches": "Today's Matches",
+    "no_today_matches_prefix": "No matches in current window · ",
+    "view_schedule": "Browse full schedule",
+    "top3": "Leaderboard Top 3",
+    "full_leaderboard": "Full leaderboard →",
+    "pred_count": "{n}/8 predicted",
+    "avg_confidence": "{pct}% confidence",
+    "disputed": "⚡ Disputed"
+  },
+  "leaderboard": {
+    "title": "🏆 AI Leaderboard",
+    "rules": "Season total · Scoring: outcome +3 / exact score +5 / O-U +1 / BTTS +1 / perfect bonus +3 / upset hit ×1.5",
+    "points_short": "pts",
+    "accuracy": "Outcome accuracy",
+    "predicted": "Predicted",
+    "empty": "Season hasn't started · Scoring begins after June 11 kickoff",
+    "upset_king": "🎯 Upset Hits",
+    "perfect": "💯 Perfect Calls",
+    "total_miss": "🤡 Total Miss"
+  },
+  "bracket": {
+    "title": "Full Schedule",
+    "tagline": "104 matches · Group stage split by 12 groups · Knockout by round · Click a card for 8-AI breakdown",
+    "group_stage_heading": "Group Stage · {n} matches",
+    "knockout_heading": "Knockout Stage · {n} matches",
+    "knockout_note": "\"Best 3rd (…)\" slots are filled after FIFA's qualification rules resolve.",
+    "group_section": "Group {letter} · {n} matches",
+    "stage_section": "{label} · {n} matches",
+    "pending_opponent": "Matchup TBD",
+    "avg_confidence": "Avg {pct}% confidence"
+  },
+  "match": {
+    "metadata_title": "{matchup} · {status} · 2026 World Cup",
+    "metadata_desc": "8 AI predictions for {matchup} — see who nails it and who crashes.",
+    "not_found_title": "Match Not Found",
+    "match_label": "Match {id}",
+    "result_status": "Result {h}-{a}",
+    "default_status": "8 AI predictions",
+    "venue_pending": "Venue TBD",
+    "pending_opponent": "Matchup TBD",
+    "vs": "vs",
+    "predictions_title_full": "8 AI Predictions ({n}/8)",
+    "predictions_title": "8 AI Predictions",
+    "empty_predictions": "Predictions not generated yet · Triggered 6h before kickoff",
+    "real_score": "Final Score",
+    "winner_home": "{name} win",
+    "winner_away": "{name} win",
+    "winner_draw": "Draw",
+    "default_home_name": "Home",
+    "default_away_name": "Away",
+    "no_prediction": "😴 No prediction",
+    "correct": "✓ Hit",
+    "wrong": "✗ Miss",
+    "confidence_short": "{pct}% conf",
+    "over_25": "Over 2.5",
+    "under_25": "Under 2.5",
+    "btts_yes": "BTTS",
+    "btts_no": "No BTTS",
+    "wildcard_label": "⚡ Wildcard"
+  },
+  "outcome": {
+    "home_win": "Home win",
+    "draw": "Draw",
+    "away_win": "Away win"
+  },
+  "stage": {
+    "group": "Group",
+    "round_of_32": "Round of 32",
+    "round_of_16": "Round of 16",
+    "quarterfinals": "Quarterfinals",
+    "semifinals": "Semifinals",
+    "third_place": "Third Place",
+    "final": "Final"
+  },
+  "locale_switcher": {
+    "label": "Language"
+  }
+}

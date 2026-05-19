@@ -1,0 +1,114 @@
+# 全栈交付物。
+#
+# 服务:
+#   db      — Postgres 16,首次启动自动跑 schema_v1.sql
+#   web     — Next.js standalone(端口 3000)
+#   cron    — 常驻 scheduler,每 15 min 调 predict-l1 + fetch-results 端点
+#   tools   — 一次性运维任务(import_schedule / verify_db / predict_day / fetch_results)
+#             profile-gated,默认不启,用 `--profile setup` 触发
+#
+# 用法:
+#   1. 复制 .env.example → .env.local,填 OPENROUTER_API_KEY / CRON_SECRET
+#   2. docker compose up -d                                  启 db + web + cron
+#   3. docker compose --profile setup up tools               (首次)导入 48 队 + 104 场
+#   4. 访问 http://localhost:3000
+#
+# 任意脚本(替换默认 command):
+#   docker compose --profile setup run --rm tools npx tsx scripts/verify_db.ts
+#   docker compose --profile setup run --rm tools npx tsx scripts/predict_day.ts 2026-06-11
+#   docker compose --profile setup run --rm tools npx tsx scripts/fetch_results.ts
+#
+# 停 / 清:
+#   docker compose down                  停容器,数据保留
+#   docker compose down -v               停 + 删数据卷(下次重建表)
+
+services:
+  db:
+    image: postgres:16
+    container_name: ai-fifa-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ai_fifa
+    ports:
+      - "5432:5432"
+    volumes:
+      - ai_fifa_pgdata:/var/lib/postgresql/data
+      - ./schema_v1.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ai_fifa"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: ai-fifa-web:latest
+    container_name: ai-fifa-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.local
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/ai_fifa
+      NODE_ENV: production
+    depends_on:
+      db:
+        condition: service_healthy
+
+  cron:
+    # 自包含 scheduler — 不依赖 Vercel Cron / GitHub Actions / etc.
+    # 每 15 min 调用一次预测 + 比分抓取端点
+    image: alpine:3
+    container_name: ai-fifa-cron
+    restart: unless-stopped
+    env_file:
+      - .env.local
+    depends_on:
+      web:
+        condition: service_started
+    command:
+      - sh
+      - -c
+      - |
+        apk add --no-cache curl >/dev/null
+        echo "[cron] started, interval 15min"
+        while true; do
+          ts=$$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo "[$$ts] predict-l1..."
+          curl -fsS -m 300 -H "Authorization: Bearer $${CRON_SECRET}" \
+            http://web:3000/api/cron/predict-l1 \
+            -o /tmp/predict.json && cat /tmp/predict.json | head -c 500 && echo "" \
+            || echo "[$$ts] predict-l1 FAILED"
+          echo "[$$ts] fetch-results..."
+          curl -fsS -m 60 -H "Authorization: Bearer $${CRON_SECRET}" \
+            http://web:3000/api/cron/fetch-results \
+            -o /tmp/fetch.json && cat /tmp/fetch.json | head -c 500 && echo "" \
+            || echo "[$$ts] fetch-results FAILED"
+          sleep 900
+        done
+
+  tools:
+    # 一次性运维任务。profile 隔离,默认不启。
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: tools
+    image: ai-fifa-tools:latest
+    container_name: ai-fifa-tools
+    profiles: ["setup"]
+    env_file:
+      - .env.local
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/ai_fifa
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  ai_fifa_pgdata:

@@ -32,9 +32,14 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# .env.example 是模板,不含敏感信息,要进 git
+!.env.example
 
 # vercel
 .vercel
+
+# Claude Code 工具配置(launch.json 用于本地 preview MCP,不是项目代码)
+.claude/
 
 # typescript
 *.tsbuildinfo

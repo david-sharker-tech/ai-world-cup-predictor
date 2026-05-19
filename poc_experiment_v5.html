@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 世界杯预测擂台 · 概念验证 v5</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+  body { background: #faf9f7; color: #1a1a18; min-height: 100vh; padding: 32px 20px; font-size: 14px; line-height: 1.6; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #888; margin-bottom: 28px; }
+  .v-badge { display: inline-block; padding: 2px 8px; background: #fef0d6; color: #6b4a0e; font-size: 11px; border-radius: 10px; margin-left: 8px; font-weight: 500; vertical-align: middle; }
+
+  .panel { background: #fff; border: 1px solid #e8e6e0; border-radius: 12px; padding: 20px 24px; margin-bottom: 18px; }
+  .panel-title { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+
+  .config-row { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+  .config-row label { font-size: 13px; color: #555; min-width: 100px; flex-shrink: 0; }
+  .config-row input[type="password"] { flex: 1; padding: 8px 12px; border: 1px solid #d4d2cc; border-radius: 6px; font-size: 13px; font-family: 'SF Mono', monospace; }
+
+  .scenario-card { padding: 14px 16px; background: #f5f3ee; border-radius: 8px; margin-bottom: 12px; font-size: 13px; line-height: 1.7; color: #444; }
+  .scenario-card strong { color: #1a1a18; }
+  .upset-banner { padding: 8px 12px; background: #fcebeb; border-radius: 6px; margin-top: 10px; font-size: 12px; color: #a32d2d; font-weight: 500; }
+
+  .truth-reveal { display: none; padding: 12px 14px; background: #fef0d6; border-radius: 8px; margin-top: 10px; font-size: 13px; color: #6b4a0e; }
+  .truth-reveal.show { display: block; }
+
+  .btn { padding: 10px 22px; background: #1a1a18; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
+  .btn:hover { opacity: 0.85; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-secondary { background: #fff; color: #1a1a18; border: 1px solid #d4d2cc; padding: 6px 14px; font-size: 12px; cursor: pointer; border-radius: 6px; }
+
+  .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .ai-card { background: #fff; border: 1px solid #e8e6e0; border-radius: 10px; overflow: hidden; min-height: 200px; }
+  .ai-header { padding: 10px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #e8e6e0; }
+  .ai-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .ai-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .ai-status { font-size: 11px; color: #888; }
+  .status-loading { color: #c97a0e; }
+  .status-done { color: #4d8b22; }
+  .status-error { color: #b03030; }
+  .model-id { font-size: 10px; color: #aaa; font-family: 'SF Mono', monospace; padding: 0 14px 6px; border-bottom: 1px dashed #f0eeeb; }
+
+  .ai-body { padding: 12px 14px; }
+  .field { display: flex; gap: 8px; padding: 4px 0; font-size: 12px; align-items: baseline; }
+  .field-label { color: #888; min-width: 64px; flex-shrink: 0; }
+  .field-value { color: #1a1a18; font-weight: 500; flex: 1; }
+  .field-value.outcome-home { color: #2e5e0e; }
+  .field-value.outcome-draw { color: #6b6b67; }
+  .field-value.outcome-away { color: #a32d2d; }
+  .conf-bar-wrap { flex: 1; }
+  .conf-bar-bg { height: 4px; background: #e8e6e0; border-radius: 2px; overflow: hidden; margin-top: 4px; }
+  .conf-bar-fill { height: 100%; border-radius: 2px; }
+
+  .reason-block { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e8e6e0; font-size: 12px; color: #555; line-height: 1.7; }
+  .reason-block strong { color: #888; font-size: 11px; display: block; margin-bottom: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .wildcard-block { margin-top: 8px; padding: 8px 10px; background: #faf2eb; border-radius: 6px; font-size: 11px; color: #6b4a0e; line-height: 1.6; }
+  .wildcard-block strong { display: block; margin-bottom: 2px; }
+
+  .upset-tag { display: inline-block; padding: 1px 6px; background: #2e5e0e; color: #fff; font-size: 10px; border-radius: 3px; margin-left: 4px; font-weight: 500; }
+
+  .loader { display: inline-block; width: 12px; height: 12px; border: 2px solid #e8e6e0; border-top-color: #1a1a18; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error-text { font-size: 11px; color: #b03030; padding: 4px 0; word-break: break-word; }
+
+  .summary { display: none; }
+  .summary.show { display: block; }
+  .summary-row { display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px solid #e8e6e0; font-size: 13px; }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-row strong { color: #1a1a18; min-width: 100px; }
+  .summary-highlight { padding: 12px 14px; background: #fcebeb; border-radius: 8px; margin-top: 12px; font-size: 13px; line-height: 1.7; color: #a32d2d; }
+  .summary-highlight strong { color: #6b1818; }
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <h1>🏆 AI 世界杯预测擂台 · 概念验证<span class="v-badge">v5 · 冷门测试</span></h1>
+  <div class="subtitle">测试 AI 在史诗级冷门场次的表现 · 看谁能押中爆冷</div>
+
+  <div class="panel">
+    <div class="panel-title">配置 API</div>
+    <div class="config-row">
+      <label>OpenRouter Key</label>
+      <input type="password" id="apiKey" placeholder="sk-or-v1-..." />
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">测试场次</div>
+    <div class="scenario-card">
+      <strong>2022 卡塔尔世界杯 · 小组赛 C 组首轮</strong><br>
+      🇦🇷 <strong>阿根廷</strong> vs <strong>沙特阿拉伯</strong> 🇸🇦<br>
+      场地: 卢赛尔球场 · 2022 年 11 月 22 日
+    </div>
+    <div class="upset-banner">
+      ⚡ 这场比赛被誉为<strong>世界杯历史最大冷门之一</strong> — 测试 AI 们敢不敢押冷门
+    </div>
+    <button class="btn-secondary" onclick="toggleTruth()" id="truthBtn">查看真实结果(对比用)</button>
+    <div class="truth-reveal" id="truthReveal">
+      <strong>真实结果:</strong> 沙特 2-1 阿根廷(客队胜)<br>
+      梅西第 10 分钟点球破门,沙特下半场连进两球完成逆转。<br>
+      阿根廷此前 36 场不败,世界排名第 3,沙特排名第 51。<br>
+      赛前博彩赔率: 阿根廷胜 1.20,沙特胜 18.00。<br>
+      <strong>但阿根廷最终夺冠</strong>(这场输球后小组艰难出线)。
+    </div>
+  </div>
+
+  <div class="panel">
+    <button class="btn" id="runBtn" onclick="runExperiment()">让 8 家 AI 同时预测 →</button>
+    <span id="globalStatus" style="margin-left:12px;font-size:12px;color:#888"></span>
+  </div>
+
+  <div class="panel summary" id="summaryPanel">
+    <div class="panel-title">实验结果观察</div>
+    <div id="summaryContent"></div>
+  </div>
+
+  <div class="results-grid" id="results"></div>
+
+</div>
+
+<script>
+const MODELS = [
+  { id: 'gpt',      name: 'GPT-5',             openrouter: 'openai/gpt-5',                color: '#10a37f', persona: '全能学长' },
+  { id: 'claude',   name: 'Claude Sonnet 4.6', openrouter: 'anthropic/claude-sonnet-4.6', color: '#7F77DD', persona: '工程男' },
+  { id: 'gemini',   name: 'Gemini 2.5 Pro',    openrouter: 'google/gemini-2.5-pro',       color: '#378ADD', persona: '学霸' },
+  { id: 'grok',     name: 'Grok 4.3',          openrouter: 'x-ai/grok-4.3',               color: '#888780', persona: '赌徒' },
+  { id: 'deepseek', name: 'DeepSeek V4 Pro',   openrouter: 'deepseek/deepseek-v4-pro',    color: '#E24B4A', persona: '刺客' },
+  { id: 'qwen',     name: 'Qwen 3.6 Plus',     openrouter: 'qwen/qwen3.6-plus',           color: '#EF9F27', persona: '卷王' },
+  { id: 'llama',    name: 'Llama 4 Maverick',  openrouter: 'meta-llama/llama-4-maverick', color: '#639922', persona: '开源' },
+  { id: 'kimi',     name: 'Kimi K2.6',         openrouter: 'moonshotai/kimi-k2.6',        color: '#D4537E', persona: '天才' },
+];
+
+const PROMPT_SYSTEM = `你是一个足球分析师,正在参加 AI 预测擂台赛。
+规则: 这是一场即将进行的比赛,你必须基于公开知识给出预测。
+要求: 严格按照 JSON 格式输出,所有字段都必须填写,不能用 null 或 undefined。
+特别提醒: 不要因为强队"应该赢"就盲目押热门 — 冷门也是足球的一部分。`;
+
+const PROMPT_USER = `请预测这场比赛:
+
+阿根廷 (世界排名第 3,梅西领衔) vs 沙特阿拉伯 (世界排名第 51)
+2022 卡塔尔世界杯 · 小组赛 C 组首轮
+卢赛尔球场 · 2022 年 11 月 22 日
+
+请严格按以下 JSON 格式输出,不要输出其他任何内容,所有字段必填:
+
+{
+  "outcome": "必须是 home_win 或 draw 或 away_win 三选一,home 代表阿根廷",
+  "score_home": 整数,代表阿根廷进球数,
+  "score_away": 整数,代表沙特进球数,
+  "goals_over_under": "必须是 over 或 under 二选一,基于 2.5 球",
+  "btts": true 或 false,
+  "confidence": 0-100 之间的整数,
+  "reason": "一句话,说一个别人不会说的理由,50字以内,不能为空",
+  "wildcard": "一个可能让预测翻车的意外因素,30字以内,不能为空"
+}`;
+
+function toggleTruth() {
+  const el = document.getElementById('truthReveal');
+  const btn = document.getElementById('truthBtn');
+  if (el.classList.contains('show')) {
+    el.classList.remove('show');
+    btn.textContent = '查看真实结果(对比用)';
+  } else {
+    el.classList.add('show');
+    btn.textContent = '收起';
+  }
+}
+
+function renderAICard(model) {
+  const card = document.createElement('div');
+  card.className = 'ai-card';
+  card.id = `card-${model.id}`;
+  card.innerHTML = `
+    <div class="ai-header">
+      <div class="ai-dot" style="background:${model.color}"></div>
+      <div class="ai-name">${model.name} <span style="font-size:11px;color:#888;font-weight:400">· ${model.persona}</span></div>
+      <div class="ai-status status-loading"><span class="loader"></span> 等待中</div>
+    </div>
+    <div class="model-id">${model.openrouter}</div>
+    <div class="ai-body" id="body-${model.id}">
+      <div style="font-size:11px;color:#888">准备调用...</div>
+    </div>
+  `;
+  return card;
+}
+
+function safeGet(obj, ...keys) {
+  for (const key of keys) {
+    if (obj[key] !== undefined && obj[key] !== null && obj[key] !== '') return obj[key];
+  }
+  return null;
+}
+
+function normalizeData(raw) {
+  let outcome = safeGet(raw, 'outcome', 'result', 'prediction', 'winner');
+  if (typeof outcome === 'string') {
+    const lower = outcome.toLowerCase();
+    if (lower.includes('home') || lower.includes('阿根廷') || lower === 'argentina') outcome = 'home_win';
+    else if (lower.includes('away') || lower.includes('沙特') || lower === 'saudi' || lower.includes('saudi')) outcome = 'away_win';
+    else if (lower.includes('draw') || lower.includes('tie') || lower.includes('平')) outcome = 'draw';
+  }
+
+  let scoreHome = safeGet(raw, 'score_home', 'home_score', 'scoreHome', 'argentina_score');
+  let scoreAway = safeGet(raw, 'score_away', 'away_score', 'scoreAway', 'saudi_score');
+
+  if (typeof scoreHome === 'string' && scoreHome.includes('-')) {
+    const parts = scoreHome.split('-');
+    scoreHome = parseInt(parts[0]);
+    if (scoreAway === null) scoreAway = parseInt(parts[1]);
+  }
+
+  let gou = safeGet(raw, 'goals_over_under', 'over_under', 'goalsOverUnder', 'total_goals');
+  if (typeof gou === 'string') {
+    if (gou.toLowerCase().includes('over') || gou.includes('大')) gou = 'over';
+    else if (gou.toLowerCase().includes('under') || gou.includes('小')) gou = 'under';
+  }
+
+  return {
+    outcome: outcome || 'unknown',
+    score_home: typeof scoreHome === 'number' ? scoreHome : (parseInt(scoreHome) || 0),
+    score_away: typeof scoreAway === 'number' ? scoreAway : (parseInt(scoreAway) || 0),
+    goals_over_under: gou || 'unknown',
+    btts: safeGet(raw, 'btts', 'both_teams_to_score') ?? false,
+    confidence: typeof safeGet(raw, 'confidence') === 'number' ? raw.confidence : (parseInt(raw.confidence) || 50),
+    reason: safeGet(raw, 'reason', 'reasoning', 'explanation') || '(无)',
+    wildcard: safeGet(raw, 'wildcard', 'risk', 'wild_card') || '',
+  };
+}
+
+function updateCardSuccess(model, raw) {
+  const data = normalizeData(raw);
+  const body = document.getElementById(`body-${model.id}`);
+  const card = document.getElementById(`card-${model.id}`);
+  const status = card.querySelector('.ai-status');
+  status.innerHTML = '✓ 已预测';
+  status.className = 'ai-status status-done';
+
+  const outcomeMap = {
+    home_win: { text: '阿根廷胜', cls: 'outcome-home' },
+    draw: { text: '平局', cls: 'outcome-draw' },
+    away_win: { text: '沙特胜', cls: 'outcome-away' },
+  };
+  const oc = outcomeMap[data.outcome] || { text: data.outcome, cls: '' };
+  const isUpset = data.outcome === 'away_win';
+
+  body.innerHTML = `
+    <div class="field">
+      <div class="field-label">预测</div>
+      <div class="field-value ${oc.cls}">${oc.text} · ${data.score_home}-${data.score_away}${isUpset ? '<span class="upset-tag">押冷门</span>' : ''}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">大小球</div>
+      <div class="field-value">${data.goals_over_under === 'over' ? '大球 >2.5' : data.goals_over_under === 'under' ? '小球 ≤2.5' : data.goals_over_under}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">双进球</div>
+      <div class="field-value">${data.btts ? '是' : '否'}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">置信度</div>
+      <div class="conf-bar-wrap">
+        <div style="font-size:11px;color:#1a1a18">${data.confidence}%</div>
+        <div class="conf-bar-bg"><div class="conf-bar-fill" style="width:${data.confidence}%;background:${model.color}"></div></div>
+      </div>
+    </div>
+    <div class="reason-block">
+      <strong>理由</strong>
+      ${data.reason}
+    </div>
+    ${data.wildcard ? `<div class="wildcard-block"><strong>⚡ 翻车风险</strong>${data.wildcard}</div>` : ''}
+  `;
+}
+
+function updateCardError(model, errMsg) {
+  const body = document.getElementById(`body-${model.id}`);
+  const card = document.getElementById(`card-${model.id}`);
+  const status = card.querySelector('.ai-status');
+  status.innerHTML = '✗ 失败';
+  status.className = 'ai-status status-error';
+  body.innerHTML = `<div class="error-text">${errMsg}</div>`;
+}
+
+async function callModel(apiKey, model) {
+  try {
+    const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://wc2026-poc.local',
+        'X-Title': 'WC2026 Predictor POC',
+      },
+      body: JSON.stringify({
+        model: model.openrouter,
+        messages: [
+          { role: 'system', content: PROMPT_SYSTEM },
+          { role: 'user', content: PROMPT_USER },
+        ],
+      }),
+    });
+
+    if (!resp.ok) {
+      const errText = await resp.text();
+      try {
+        const parsedErr = JSON.parse(errText);
+        throw new Error(`HTTP ${resp.status}: ${parsedErr.error?.message || errText.slice(0, 150)}`);
+      } catch (e) {
+        throw new Error(`HTTP ${resp.status}: ${errText.slice(0, 150)}`);
+      }
+    }
+
+    const data = await resp.json();
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) throw new Error('返回内容为空');
+
+    let cleanContent = content.trim();
+    cleanContent = cleanContent.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
+    const firstBrace = cleanContent.indexOf('{');
+    const lastBrace = cleanContent.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      cleanContent = cleanContent.slice(firstBrace, lastBrace + 1);
+    }
+
+    const parsed = JSON.parse(cleanContent);
+    return { success: true, data: parsed };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+async function runExperiment() {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  if (!apiKey) {
+    alert('请先填入 OpenRouter API Key');
+    return;
+  }
+
+  const btn = document.getElementById('runBtn');
+  const status = document.getElementById('globalStatus');
+  btn.disabled = true;
+  btn.textContent = '正在预测...';
+  status.textContent = '8 家 AI 同时调用中...';
+
+  const resultsEl = document.getElementById('results');
+  resultsEl.innerHTML = '';
+  document.getElementById('summaryPanel').classList.remove('show');
+
+  MODELS.forEach(m => resultsEl.appendChild(renderAICard(m)));
+
+  const results = await Promise.all(
+    MODELS.map(async model => {
+      const result = await callModel(apiKey, model);
+      if (result.success) {
+        updateCardSuccess(model, result.data);
+      } else {
+        updateCardError(model, result.error);
+      }
+      return { model, ...result };
+    })
+  );
+
+  const successful = results.filter(r => r.success);
+  const summary = generateSummary(successful);
+  document.getElementById('summaryContent').innerHTML = summary;
+  document.getElementById('summaryPanel').classList.add('show');
+
+  status.textContent = `完成 · ${successful.length}/8 家成功响应`;
+  btn.disabled = false;
+  btn.textContent = '再跑一次';
+}
+
+function generateSummary(results) {
+  if (results.length === 0) return '<div class="error-text">所有调用都失败了</div>';
+
+  const outcomes = { home_win: 0, draw: 0, away_win: 0, unknown: 0 };
+  const upsetPredictors = [];
+  results.forEach(r => {
+    const data = normalizeData(r.data);
+    outcomes[data.outcome] = (outcomes[data.outcome] || 0) + 1;
+    if (data.outcome === 'away_win') {
+      upsetPredictors.push(r.model.name);
+    }
+  });
+
+  const winner = Object.entries(outcomes).sort((a,b) => b[1] - a[1])[0];
+  const winnerName = { home_win: '阿根廷', draw: '平局', away_win: '沙特' }[winner[0]] || winner[0];
+
+  const scores = results.map(r => {
+    const d = normalizeData(r.data);
+    return `${d.score_home}-${d.score_away}`;
+  });
+  const uniqueScores = [...new Set(scores)];
+
+  const confs = results.map(r => normalizeData(r.data).confidence).filter(c => c > 0);
+  const avgConf = confs.length ? Math.round(confs.reduce((s,c) => s+c, 0) / confs.length) : 0;
+
+  let upsetSection = '';
+  if (upsetPredictors.length > 0) {
+    upsetSection = `
+      <div class="summary-highlight">
+        <strong>🎯 押中冷门的 AI: ${upsetPredictors.join('、')}</strong><br>
+        真实结果是沙特 2-1 阿根廷,这${upsetPredictors.length}家 AI 押对了世界杯历史最大冷门之一。
+        这就是产品最有传播价值的内容形态。
+      </div>
+    `;
+  } else {
+    upsetSection = `
+      <div class="summary-highlight">
+        <strong>📰 8 家 AI 集体翻车</strong><br>
+        没有任何一家 AI 押中沙特爆冷。真实结果是沙特 2-1 阿根廷。
+        这就是产品的另一种内容金矿 — "AI 全错"标题永远有流量。
+      </div>
+    `;
+  }
+
+  return `
+    <div class="summary-row"><strong>主流共识</strong><span>${winner[1]}/${results.length} 押 ${winnerName}</span></div>
+    <div class="summary-row"><strong>预测分布</strong><span>阿根廷胜: ${outcomes.home_win || 0} · 平局: ${outcomes.draw || 0} · 沙特胜: ${outcomes.away_win || 0}</span></div>
+    <div class="summary-row"><strong>比分多样性</strong><span>${uniqueScores.length} 种不同比分: ${uniqueScores.join(', ')}</span></div>
+    <div class="summary-row"><strong>平均置信度</strong><span>${avgConf}%</span></div>
+    <div class="summary-row"><strong>真实结果</strong><span>沙特 2-1 阿根廷(史诗冷门)</span></div>
+    ${upsetSection}
+  `;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,275 @@
+// ============================================================
+// AI 世界杯预测擂台 - Prisma Schema
+// ============================================================
+// 设计原则:
+//   - schema_v1.sql 是真理源(CHECK 约束 / 视图 / 部分索引 / seed
+//     都在那里手写)
+//   - 本文件仅描述 Prisma client 需要的类型信息,**不要用
+//     prisma migrate 修改 DB**,改动一律先改 schema_v1.sql 再
+//     重新跑 docker-compose down -v + up,然后(可选)prisma db pull
+//     重新同步本文件
+//   - 字段名保持 snake_case 以匹配 DB 列名和已有 TS 类型
+// ============================================================
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["views"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------- 表 ----------
+
+model ai_models {
+  id             String           @id
+  name           String
+  openrouter_id  String
+  persona_label  String
+  persona_quote  String?
+  color_hex      String
+  country        String?
+  founder        String?
+  joined_at      DateTime         @default(dbgenerated("CURRENT_DATE")) @db.Date
+  is_active      Boolean          @default(true)
+  created_at     DateTime         @default(now()) @db.Timestamptz(6)
+
+  predictions_l1 predictions_l1[]
+  predictions_l2 predictions_l2[]
+  predictions_l3 predictions_l3[]
+  api_call_logs  api_call_logs[]
+}
+
+model teams {
+  id             String   @id
+  name           String
+  name_zh        String
+  group_letter   String   @db.Char(1)
+  flag_emoji     String?
+  fifa_ranking   Int?
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+
+  matches_home   matches[]        @relation("home_team")
+  matches_away   matches[]        @relation("away_team")
+  l2_first       predictions_l2[] @relation("l2_first")
+  l2_second      predictions_l2[] @relation("l2_second")
+  l2_third       predictions_l2[] @relation("l2_third")
+  l2_fourth      predictions_l2[] @relation("l2_fourth")
+  l3_champion    predictions_l3[] @relation("l3_champion")
+  l3_runner_up   predictions_l3[] @relation("l3_runner_up")
+  l3_third       predictions_l3[] @relation("l3_third")
+  l3_fourth      predictions_l3[] @relation("l3_fourth")
+
+  @@index([group_letter])
+}
+
+model matches {
+  id             String           @id
+  stage          String
+  group_letter   String?          @db.Char(1)
+  kickoff_at     DateTime         @db.Timestamptz(6)
+  home_team_id   String?
+  away_team_id   String?
+  pending_label  String?
+  venue          String?
+  city           String?
+  country        String?
+  status         String           @default("scheduled")
+  created_at     DateTime         @default(now()) @db.Timestamptz(6)
+
+  home_team      teams?           @relation("home_team", fields: [home_team_id], references: [id])
+  away_team      teams?           @relation("away_team", fields: [away_team_id], references: [id])
+
+  predictions_l1 predictions_l1[]
+  match_result   match_results?
+  l2_triggered   predictions_l2[] @relation("l2_trigger")
+  api_call_logs  api_call_logs[]
+
+  @@index([kickoff_at])
+  @@index([stage])
+  @@index([group_letter])
+  @@index([status])
+}
+
+model predictions_l1 {
+  id                String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  match_id          String
+  model_id          String
+  outcome           String
+  score_home        Int      @db.SmallInt
+  score_away        Int      @db.SmallInt
+  goals_over_under  String
+  btts              Boolean
+  confidence        Int      @db.SmallInt
+  reason            String
+  wildcard          String?
+  raw_response      Json?
+  locked_at         DateTime @default(now()) @db.Timestamptz(6)
+  prompt_version    String   @default("v1.0")
+
+  match             matches            @relation(fields: [match_id], references: [id])
+  model             ai_models          @relation(fields: [model_id], references: [id])
+  score             prediction_scores?
+
+  @@unique([match_id, model_id])
+  @@index([match_id])
+  @@index([model_id])
+  @@index([locked_at])
+}
+
+model predictions_l2 {
+  id                  String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  group_letter        String    @db.Char(1)
+  model_id            String
+  version             Int       @db.SmallInt
+  first_place_team    String?
+  second_place_team   String?
+  third_place_team    String?
+  fourth_place_team   String?
+  reason              String?
+  triggered_by_match  String?
+  raw_response        Json?
+  created_at          DateTime  @default(now()) @db.Timestamptz(6)
+
+  model               ai_models @relation(fields: [model_id], references: [id])
+  first_team          teams?    @relation("l2_first",  fields: [first_place_team],  references: [id])
+  second_team         teams?    @relation("l2_second", fields: [second_place_team], references: [id])
+  third_team          teams?    @relation("l2_third",  fields: [third_place_team],  references: [id])
+  fourth_team         teams?    @relation("l2_fourth", fields: [fourth_place_team], references: [id])
+  trigger_match       matches?  @relation("l2_trigger", fields: [triggered_by_match], references: [id])
+
+  @@unique([group_letter, model_id, version])
+  @@index([group_letter, version])
+  @@index([model_id])
+}
+
+model predictions_l3 {
+  id             String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  model_id       String
+  version        Int      @db.SmallInt
+  champion_team  String?
+  runner_up_team String?
+  third_team     String?
+  fourth_team    String?
+  reason         String?
+  raw_response   Json?
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+
+  model          ai_models @relation(fields: [model_id], references: [id])
+  champion       teams?    @relation("l3_champion",   fields: [champion_team],  references: [id])
+  runner_up      teams?    @relation("l3_runner_up",  fields: [runner_up_team], references: [id])
+  third          teams?    @relation("l3_third",      fields: [third_team],     references: [id])
+  fourth         teams?    @relation("l3_fourth",     fields: [fourth_team],    references: [id])
+
+  @@unique([model_id, version])
+  @@index([model_id, version])
+}
+
+model match_results {
+  match_id            String   @id
+  score_home          Int      @db.SmallInt
+  score_away          Int      @db.SmallInt
+  went_to_extra_time  Boolean  @default(false)
+  extra_time_home     Int?     @db.SmallInt
+  extra_time_away     Int?     @db.SmallInt
+  went_to_penalties   Boolean  @default(false)
+  penalty_home        Int?     @db.SmallInt
+  penalty_away        Int?     @db.SmallInt
+  winner              String
+  source              String   @default("openfootball")
+  recorded_at         DateTime @default(now()) @db.Timestamptz(6)
+
+  match               matches  @relation(fields: [match_id], references: [id])
+}
+
+model prediction_scores {
+  id              String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  prediction_id   String   @unique @db.Uuid
+  outcome_correct Boolean
+  score_exact     Boolean
+  goals_correct   Boolean
+  btts_correct    Boolean
+  points          Int      @db.SmallInt
+  is_upset_hit    Boolean  @default(false)
+  is_perfect      Boolean  @default(false)
+  is_total_miss   Boolean  @default(false)
+  calculated_at   DateTime @default(now()) @db.Timestamptz(6)
+
+  prediction      predictions_l1 @relation(fields: [prediction_id], references: [id])
+
+  @@index([prediction_id])
+}
+
+model api_call_logs {
+  id                 String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  model_id           String
+  match_id           String?
+  layer              String
+  group_letter       String?  @db.Char(1)
+  prompt_version     String   @default("v1.0")
+  attempt            Int      @db.SmallInt
+  status             String
+  http_status        Int?     @db.SmallInt
+  error_message      String?
+  latency_ms         Int?
+  prompt_tokens      Int?
+  completion_tokens  Int?
+  cost_usd           Decimal? @db.Decimal(10, 6)
+  called_at          DateTime @default(now()) @db.Timestamptz(6)
+
+  model              ai_models @relation(fields: [model_id], references: [id])
+  match              matches?  @relation(fields: [match_id], references: [id])
+
+  @@index([model_id, called_at(sort: Desc)])
+  @@index([match_id])
+}
+
+// ---------- 视图(只读) ----------
+
+view v_leaderboard {
+  model_id            String  @unique
+  model_name          String
+  color_hex           String
+  persona_label       String
+  total_predictions   BigInt
+  total_points        BigInt
+  outcome_wins        BigInt
+  exact_scores        BigInt
+  upset_hits          BigInt
+  perfect_predictions BigInt
+  total_misses        BigInt
+  accuracy_pct        Decimal @db.Decimal
+}
+
+view v_today_matches {
+  match_id         String   @unique
+  kickoff_at       DateTime @db.Timestamptz(6)
+  stage            String
+  group_letter     String?  @db.Char(1)
+  home_name        String?
+  home_flag        String?
+  away_name        String?
+  away_flag        String?
+  venue            String?
+  status           String
+  prediction_count BigInt
+  avg_confidence   Decimal? @db.Decimal
+  is_disputed      Boolean
+}
+
+view v_model_reliability {
+  model_id              String   @unique
+  model_name            String
+  openrouter_id         String
+  attempts_7d           BigInt
+  successes_7d          BigInt
+  success_rate_pct      Decimal? @db.Decimal
+  timeouts              BigInt
+  parse_errors          BigInt
+  rate_limits           BigInt
+  invalid_model_errors  BigInt
+  empty_responses       BigInt
+  avg_latency_ms        Decimal? @db.Decimal
+  cost_7d_usd           Decimal  @db.Decimal
+}

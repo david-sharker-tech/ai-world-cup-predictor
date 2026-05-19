@@ -1,0 +1,90 @@
+{
+  "site": {
+    "title": "AI 世界杯预测擂台",
+    "tagline": "8 家顶级 AI 同台预测 2026 世界杯,看谁押中、谁翻车。"
+  },
+  "nav": {
+    "home": "首页",
+    "schedule": "赛程总览",
+    "leaderboard": "积分榜",
+    "back_to_schedule": "← 赛程总览"
+  },
+  "home": {
+    "today_matches": "今日比赛",
+    "no_today_matches_prefix": "今日窗口内无比赛 · ",
+    "view_schedule": "查看赛程总览",
+    "top3": "积分榜 Top 3",
+    "full_leaderboard": "完整榜单 →",
+    "pred_count": "{n}/8 已预测",
+    "avg_confidence": "置信 {pct}%",
+    "disputed": "⚡ 分歧"
+  },
+  "leaderboard": {
+    "title": "🏆 AI 积分榜",
+    "rules": "赛季累计得分 · 评分规则:对 +3 / 比分全中 +5 / 大小球 +1 / 双进球 +1 / 四项全对额外 +3 / 押中冷门 ×1.5",
+    "points_short": "分",
+    "accuracy": "胜负准确率",
+    "predicted": "已预测",
+    "empty": "赛季尚未开始 · 6 月 11 日首场过后开始累计",
+    "upset_king": "🎯 押冷门王",
+    "perfect": "💯 完美预测",
+    "total_miss": "🤡 集体翻车"
+  },
+  "bracket": {
+    "title": "赛程总览",
+    "tagline": "104 场比赛 · 小组赛按 12 组拆 · 淘汰赛按阶段排 · 点卡片看 8 家 AI 详细预测",
+    "group_stage_heading": "小组赛 · {n} 场",
+    "knockout_heading": "淘汰赛 · {n} 场",
+    "knockout_note": "含「Best 3rd (…)」的场次需 FIFA 出线规则定后填入。",
+    "group_section": "{letter} 组 · {n} 场",
+    "stage_section": "{label} · {n} 场",
+    "pending_opponent": "对阵待定",
+    "avg_confidence": "平均置信 {pct}%"
+  },
+  "match": {
+    "metadata_title": "{matchup} · {status} · 2026 世界杯",
+    "metadata_desc": "{matchup} 的 8 家 AI 预测对比,谁押中谁翻车一目了然。",
+    "not_found_title": "比赛未找到",
+    "match_label": "比赛 {id}",
+    "result_status": "结果 {h}-{a}",
+    "default_status": "8 家 AI 预测",
+    "venue_pending": "场馆待定",
+    "pending_opponent": "对阵待定",
+    "vs": "vs",
+    "predictions_title_full": "8 家 AI 预测 ({n}/8)",
+    "predictions_title": "8 家 AI 预测",
+    "empty_predictions": "预测尚未生成 · 开赛前 6 小时批量调用",
+    "real_score": "真实比分",
+    "winner_home": "{name}胜",
+    "winner_away": "{name}胜",
+    "winner_draw": "平局",
+    "default_home_name": "主队",
+    "default_away_name": "客队",
+    "no_prediction": "😴 尚未预测",
+    "correct": "✓ 押中",
+    "wrong": "✗ 翻车",
+    "confidence_short": "置信度 {pct}%",
+    "over_25": "大球",
+    "under_25": "小球",
+    "btts_yes": "双进球",
+    "btts_no": "非双进球",
+    "wildcard_label": "⚡ 翻车风险"
+  },
+  "outcome": {
+    "home_win": "主胜",
+    "draw": "平局",
+    "away_win": "客胜"
+  },
+  "stage": {
+    "group": "小组赛",
+    "round_of_32": "32 强",
+    "round_of_16": "16 强",
+    "quarterfinals": "1/4 决赛",
+    "semifinals": "半决赛",
+    "third_place": "季军赛",
+    "final": "决赛"
+  },
+  "locale_switcher": {
+    "label": "语言"
+  }
+}
