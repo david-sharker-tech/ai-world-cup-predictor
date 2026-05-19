@@ -8,6 +8,7 @@ import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { prisma } from '@/lib/prisma';
 import { teamName } from '@/lib/team-name';
+import { LocalDateTime } from '@/components/LocalDateTime';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,7 +59,7 @@ export default async function BracketPage({
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-14">
       <header className="mb-6 lg:mb-10">
-        <Link href="/" className="text-xs text-muted-foreground underline underline-offset-4">← {t('nav.home')}</Link>
+        <Link href="/" className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground">← {t('nav.home')}</Link>
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold mt-2 mb-1">{t('bracket.title')}</h1>
         <p className="text-sm lg:text-base text-muted-foreground max-w-2xl">{t('bracket.tagline')}</p>
       </header>
@@ -140,6 +141,8 @@ function MatchCard({ match, compact, locale, t, formatter }: MatchCardProps) {
     : null;
   const hasPredictions = match.predictions_l1.length > 0;
 
+  const dateFallback = formatter.dateTime(match.kickoff_at, { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false });
+
   return (
     <Link
       href={`/match/${match.id}`}
@@ -147,33 +150,39 @@ function MatchCard({ match, compact, locale, t, formatter }: MatchCardProps) {
         hasTeams ? 'border-border' : 'border-dashed border-border'
       }`}
     >
-      <div className="flex items-baseline gap-2 mb-1">
-        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{match.id}</span>
-        {hasPredictions && (
-          <span className="text-[10px] text-emerald-700 ml-auto">{match.predictions_l1.length}/8</span>
-        )}
-      </div>
-      <div className={`font-medium leading-snug ${compact ? 'text-sm min-h-0' : 'text-sm min-h-[2.5rem]'}`}>
-        {hasTeams ? (
-          <>
-            <span>{match.home_team!.flag_emoji} {teamName(match.home_team!, locale)}</span>
-            <span className="text-muted-foreground mx-1.5">{t('match.vs')}</span>
-            <span>{match.away_team!.flag_emoji} {teamName(match.away_team!, locale)}</span>
-          </>
-        ) : (
-          <span className="text-muted-foreground">{match.pending_label ?? t('bracket.pending_opponent')}</span>
-        )}
-      </div>
-      {match.match_result && (
-        <div className="text-sm font-semibold tabular-nums mt-1">
-          {match.match_result.score_home}–{match.match_result.score_away}
+      <div className="flex items-stretch gap-3">
+        <div className="flex-1 min-w-0 space-y-1">
+          <div className="text-[10px] text-muted-foreground">
+            <LocalDateTime iso={match.kickoff_at.toISOString()} locale={locale} fallback={dateFallback} />
+          </div>
+          {hasTeams ? (
+            <>
+              <div className="text-sm font-medium flex items-center gap-1.5 min-w-0">
+                <span className="shrink-0">{match.home_team!.flag_emoji}</span>
+                <span className="truncate">{teamName(match.home_team!, locale)}</span>
+                {match.match_result && (
+                  <span className="ml-auto tabular-nums font-semibold pl-2">{match.match_result.score_home}</span>
+                )}
+              </div>
+              <div className="text-sm font-medium flex items-center gap-1.5 min-w-0">
+                <span className="shrink-0">{match.away_team!.flag_emoji}</span>
+                <span className="truncate">{teamName(match.away_team!, locale)}</span>
+                {match.match_result && (
+                  <span className="ml-auto tabular-nums font-semibold pl-2">{match.match_result.score_away}</span>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="text-sm font-medium text-muted-foreground leading-snug">
+              {match.pending_label ?? t('bracket.pending_opponent')}
+            </div>
+          )}
         </div>
-      )}
-      <div className="flex items-center justify-between text-[10px] text-muted-foreground mt-1.5">
-        <span>
-          {formatter.dateTime(match.kickoff_at, { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })}
-        </span>
-        {avgConf != null && <span>{t('bracket.avg_confidence', { pct: avgConf })}</span>}
+        <div className="text-right text-[10px] text-muted-foreground shrink-0 flex flex-col gap-0.5 items-end justify-end">
+          <span className="uppercase tracking-wider">{match.id}</span>
+          {hasPredictions && <span className="text-emerald-700">{match.predictions_l1.length}/8</span>}
+          {avgConf != null && <span>{t('bracket.avg_confidence', { pct: avgConf })}</span>}
+        </div>
       </div>
     </Link>
   );

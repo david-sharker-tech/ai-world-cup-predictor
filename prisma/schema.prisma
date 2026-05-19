@@ -103,7 +103,9 @@ model predictions_l1 {
   btts              Boolean
   confidence        Int      @db.SmallInt
   reason            String
+  reason_en         String?
   wildcard          String?
+  wildcard_en       String?
   raw_response      Json?
   locked_at         DateTime @default(now()) @db.Timestamptz(6)
   prompt_version    String   @default("v1.0")
@@ -250,6 +252,24 @@ view v_today_matches {
   home_name        String?
   home_flag        String?
   away_name        String?
+  away_flag        String?
+  venue            String?
+  status           String
+  prediction_count BigInt
+  avg_confidence   Decimal? @db.Decimal
+  is_disputed      Boolean
+}
+
+view v_upcoming_matches {
+  match_id         String   @unique
+  kickoff_at       DateTime @db.Timestamptz(6)
+  stage            String
+  group_letter     String?  @db.Char(1)
+  home_name        String?
+  home_name_en     String?
+  home_flag        String?
+  away_name        String?
+  away_name_en     String?
   away_flag        String?
   venue            String?
   status           String

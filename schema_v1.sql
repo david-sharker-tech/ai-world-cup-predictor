@@ -116,9 +116,11 @@ CREATE TABLE predictions_l1 (
   btts              boolean NOT NULL,                        -- 两队都进球
   confidence        smallint NOT NULL,                       -- 0-100 置信度
 
-  -- 内容生成字段
-  reason            text NOT NULL,                           -- "一句别人不会说的理由"
-  wildcard          text,                                    -- "让预测翻车的意外因素"
+  -- 内容生成字段(双语:zh 必填,en 自 v1.1 prompt 起由 AI 同时输出,旧数据为 null)
+  reason            text NOT NULL,                           -- 中文:"一句别人不会说的理由"
+  reason_en         text,                                    -- 英文版,prompt v1.1+ 才有
+  wildcard          text,                                    -- 中文:"让预测翻车的意外因素"
+  wildcard_en       text,                                    -- 英文版,prompt v1.1+ 才有
 
   -- 调度元数据
   raw_response      jsonb,                                   -- 完整原始响应(便于排错)
@@ -372,7 +374,48 @@ GROUP BY m.id, m.kickoff_at, m.stage, m.group_letter,
          m.venue, m.status
 ORDER BY m.kickoff_at;
 
-COMMENT ON VIEW v_today_matches IS '今日比赛 + 8 家预测概览,首页主查询';
+COMMENT ON VIEW v_today_matches IS '今日比赛 + 8 家预测概览,赛季中后期热点窗口用';
+
+
+-- ============================================================
+-- 便利视图: 即将开赛的比赛(首页主查询)
+-- ============================================================
+-- 不限"今日窗口",取所有尚未开赛的比赛按时间排序。
+-- 首页 take 前 N 条;LIMIT 留到查询层做。
+-- ============================================================
+
+CREATE OR REPLACE VIEW v_upcoming_matches AS
+SELECT
+  m.id                AS match_id,
+  m.kickoff_at,
+  m.stage,
+  m.group_letter,
+  ht.name_zh          AS home_name,
+  ht.name             AS home_name_en,
+  ht.flag_emoji       AS home_flag,
+  at.name_zh          AS away_name,
+  at.name             AS away_name_en,
+  at.flag_emoji       AS away_flag,
+  m.venue,
+  m.status,
+  COUNT(p.id)         AS prediction_count,
+  ROUND(AVG(p.confidence)::numeric, 1) AS avg_confidence,
+  CASE WHEN COUNT(p.id) FILTER (WHERE p.outcome = 'home_win') >= 3
+        AND COUNT(p.id) FILTER (WHERE p.outcome IN ('draw','away_win')) >= 3
+       THEN true ELSE false
+  END                  AS is_disputed
+FROM matches m
+LEFT JOIN teams ht ON ht.id = m.home_team_id
+LEFT JOIN teams at ON at.id = m.away_team_id
+LEFT JOIN predictions_l1 p ON p.match_id = m.id
+WHERE m.kickoff_at > now()
+  AND m.status <> 'finished'
+GROUP BY m.id, m.kickoff_at, m.stage, m.group_letter,
+         ht.name_zh, ht.name, ht.flag_emoji, at.name_zh, at.name, at.flag_emoji,
+         m.venue, m.status
+ORDER BY m.kickoff_at;
+
+COMMENT ON VIEW v_upcoming_matches IS '即将开赛(kickoff_at > now)的比赛 + 预测概览,首页主查询';
 
 
 -- ============================================================

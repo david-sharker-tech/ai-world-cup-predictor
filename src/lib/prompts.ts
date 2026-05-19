@@ -4,12 +4,13 @@
 
 import type { matches, teams } from '@prisma/client';
 
-export const PROMPT_VERSION = 'v1.0';
+export const PROMPT_VERSION = 'v1.1';
 
 export const SYSTEM_PROMPT = `你是一个足球分析师,正在参加 AI 预测擂台赛。
 规则: 这是一场即将进行的比赛,你必须基于公开知识给出预测。
 要求: 严格按照 JSON 格式输出,所有字段都必须填写,不能用 null 或 undefined。
-特别提醒: 不要因为强队"应该赢"就盲目押热门 — 冷门也是足球的一部分。`;
+特别提醒: 不要因为强队"应该赢"就盲目押热门 — 冷门也是足球的一部分。
+双语要求: reason / wildcard 必须同时给出中文 (zh) 和英文 (en) 两个版本,两版表达同一观点,en 必须是地道英文不能是机翻直译。`;
 
 export function buildUserPrompt(match: matches, home: teams, away: teams): string {
   const kickoff = match.kickoff_at.toLocaleString('zh-CN', {
@@ -38,8 +39,10 @@ ${venueLine}
   "goals_over_under": "必须是 over 或 under 二选一,基于 2.5 球",
   "btts": true 或 false,
   "confidence": 0-100 之间的整数,
-  "reason": "一句话,说一个别人不会说的理由,50字以内,不能为空",
-  "wildcard": "一个可能让预测翻车的意外因素,30字以内,不能为空"
+  "reason_zh": "中文:一句话,说一个别人不会说的理由,50字以内,不能为空",
+  "reason_en": "English: same point as reason_zh, idiomatic English, under 30 words, must not be empty",
+  "wildcard_zh": "中文:一个可能让预测翻车的意外因素,30字以内,不能为空",
+  "wildcard_en": "English: same wildcard as wildcard_zh, idiomatic English, under 20 words, must not be empty"
 }`;
 }
 

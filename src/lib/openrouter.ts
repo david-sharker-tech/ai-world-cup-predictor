@@ -302,6 +302,13 @@ export function normalizeData(
   let confidence = pickNumber(r, 'confidence') ?? 50;
   confidence = Math.max(0, Math.min(100, confidence));
 
+  // 双语:prompt v1.1 起返回 reason_zh / reason_en / wildcard_zh / wildcard_en
+  // 兼容旧返回 reason / wildcard(当作 zh)
+  const reasonZh = pickString(r, 'reason_zh', 'reason', 'reasoning', 'explanation') ?? '(无)';
+  const reasonEn = pickString(r, 'reason_en', 'reasonEn');
+  const wildcardZh = pickString(r, 'wildcard_zh', 'wildcard', 'risk', 'wild_card') ?? '';
+  const wildcardEn = pickString(r, 'wildcard_en', 'wildcardEn');
+
   return {
     outcome,
     score_home: scoreHome ?? 0,
@@ -309,7 +316,9 @@ export function normalizeData(
     goals_over_under: gou,
     btts,
     confidence,
-    reason: pickString(r, 'reason', 'reasoning', 'explanation') ?? '(无)',
-    wildcard: pickString(r, 'wildcard', 'risk', 'wild_card') ?? '',
+    reason: reasonZh,
+    reason_en: reasonEn,
+    wildcard: wildcardZh,
+    wildcard_en: wildcardEn,
   };
 }

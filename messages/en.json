@@ -10,9 +10,10 @@
     "back_to_schedule": "← Schedule"
   },
   "home": {
-    "today_matches": "Today's Matches",
-    "no_today_matches_prefix": "No matches in current window · ",
+    "upcoming_matches": "Upcoming Matches",
+    "no_upcoming_prefix": "No upcoming matches · ",
     "view_schedule": "Browse full schedule",
+    "view_more": "Full schedule →",
     "top3": "Leaderboard Top 3",
     "full_leaderboard": "Full leaderboard →",
     "pred_count": "{n}/8 predicted",

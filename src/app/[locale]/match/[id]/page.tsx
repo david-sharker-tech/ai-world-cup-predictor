@@ -6,6 +6,7 @@ import type { Locale } from '@/i18n/routing';
 import { prisma } from '@/lib/prisma';
 import { AI_MODELS } from '@/lib/ai-models';
 import { teamName } from '@/lib/team-name';
+import { LocalDateTime } from '@/components/LocalDateTime';
 import type { Outcome } from '@/lib/types';
 import type { matches, teams, predictions_l1, match_results } from '@prisma/client';
 
@@ -90,7 +91,12 @@ export default async function MatchPage({ params }: PageProps) {
         </div>
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold leading-tight">{matchupLabel}</h1>
         <div className="text-sm lg:text-base text-muted-foreground mt-2">
-          {formatter.dateTime(match.kickoff_at, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })}
+          <LocalDateTime
+            iso={match.kickoff_at.toISOString()}
+            locale={locale}
+            fallback={formatter.dateTime(match.kickoff_at, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })}
+            options={{ year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }}
+          />
           {' · '}{match.venue ?? t('match.venue_pending')}
           {match.city ? ` · ${match.city}` : ''}
         </div>
@@ -115,7 +121,7 @@ export default async function MatchPage({ params }: PageProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4">
             {AI_MODELS.map(m => {
               const p = predictions.find(x => x.model_id === m.id);
-              return <PredictionCard key={m.id} model={m} prediction={p ?? null} result={result} t={t} />;
+              return <PredictionCard key={m.id} model={m} prediction={p ?? null} result={result} locale={locale as Locale} t={t} />;
             })}
           </div>
         )}
@@ -161,13 +167,21 @@ interface PredictionCardProps {
   model: typeof AI_MODELS[number];
   prediction: predictions_l1 | null;
   result: match_results | null;
+  locale: Locale;
   t: Awaited<ReturnType<typeof getTranslations>>;
 }
 
-function PredictionCard({ model, prediction, result, t }: PredictionCardProps) {
+function PredictionCard({ model, prediction, result, locale, t }: PredictionCardProps) {
   const finished = !!result;
   const correct = finished && prediction
     ? isOutcomeCorrect(prediction.outcome as Outcome, result.winner as 'home' | 'draw' | 'away')
+    : null;
+  // prompt v1.1 起 AI 输出双语;v1.0 旧数据 _en 为 null,fallback 到 zh
+  const reasonText = prediction
+    ? (locale === 'en' ? (prediction.reason_en ?? prediction.reason) : prediction.reason)
+    : '';
+  const wildcardText = prediction
+    ? (locale === 'en' ? (prediction.wildcard_en ?? prediction.wildcard) : prediction.wildcard)
     : null;
 
   return (
@@ -203,12 +217,12 @@ function PredictionCard({ model, prediction, result, t }: PredictionCardProps) {
             {' '}{prediction.btts ? t('match.btts_yes') : t('match.btts_no')}
           </div>
           <div className="text-[12px] text-foreground/80 leading-relaxed pt-1.5 border-t border-dashed border-border">
-            {prediction.reason}
+            {reasonText}
           </div>
-          {prediction.wildcard && (
+          {wildcardText && (
             <div className="text-[11px] bg-amber-50 text-amber-900 rounded px-2 py-1.5 leading-relaxed">
               <strong className="block font-semibold">{t('match.wildcard_label')}</strong>
-              {prediction.wildcard}
+              {wildcardText}
             </div>
           )}
         </div>

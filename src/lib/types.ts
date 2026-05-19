@@ -13,6 +13,8 @@ export interface NormalizedPrediction {
   goals_over_under: OverUnder | 'unknown';
   btts: boolean;
   confidence: number;
-  reason: string;
-  wildcard: string;
+  reason: string;         // zh,主字段(prompt v1.0 兼容)
+  reason_en: string | null;
+  wildcard: string;       // zh
+  wildcard_en: string | null;
 }

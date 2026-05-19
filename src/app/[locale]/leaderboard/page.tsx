@@ -39,7 +39,7 @@ export default async function LeaderboardPage({
   return (
     <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-14">
       <header className="mb-6 lg:mb-8">
-        <Link href="/" className="text-xs text-muted-foreground underline underline-offset-4">← {t('nav.home')}</Link>
+        <Link href="/" className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground">← {t('nav.home')}</Link>
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold mt-2 mb-1">{t('leaderboard.title')}</h1>
         <p className="text-sm lg:text-base text-muted-foreground max-w-2xl">
           {t('leaderboard.rules')}

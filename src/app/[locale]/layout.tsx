@@ -3,6 +3,7 @@ import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { routing, type Locale } from '@/i18n/routing';
+import { LocaleSwitcher } from '@/components/LocaleSwitcher';
 import '../globals.css';
 
 export async function generateStaticParams() {
@@ -36,7 +37,12 @@ export default async function LocaleLayout({
   return (
     <html lang={locale === 'zh' ? 'zh-CN' : 'en'} className="h-full antialiased">
       <body className="min-h-full flex flex-col">
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 flex justify-end text-muted-foreground/70 hover:text-foreground transition-colors">
+            <LocaleSwitcher />
+          </div>
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );

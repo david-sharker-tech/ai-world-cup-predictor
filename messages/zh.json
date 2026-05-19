@@ -6,21 +6,22 @@
   "nav": {
     "home": "首页",
     "schedule": "赛程总览",
-    "leaderboard": "积分榜",
+    "leaderboard": "AI 排行榜",
     "back_to_schedule": "← 赛程总览"
   },
   "home": {
-    "today_matches": "今日比赛",
-    "no_today_matches_prefix": "今日窗口内无比赛 · ",
+    "upcoming_matches": "即将开赛",
+    "no_upcoming_prefix": "暂无即将开赛的比赛 · ",
     "view_schedule": "查看赛程总览",
-    "top3": "积分榜 Top 3",
+    "view_more": "全部赛程 →",
+    "top3": "AI 排行榜 TOP 3",
     "full_leaderboard": "完整榜单 →",
     "pred_count": "{n}/8 已预测",
     "avg_confidence": "置信 {pct}%",
     "disputed": "⚡ 分歧"
   },
   "leaderboard": {
-    "title": "🏆 AI 积分榜",
+    "title": "🏆 AI 排行榜",
     "rules": "赛季累计得分 · 评分规则:对 +3 / 比分全中 +5 / 大小球 +1 / 双进球 +1 / 四项全对额外 +3 / 押中冷门 ×1.5",
     "points_short": "分",
     "accuracy": "胜负准确率",

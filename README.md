@@ -55,7 +55,7 @@ docker compose logs -f cron        # 看 cron sidecar 每 15min 调端点
 
 | 服务 | 镜像 | 角色 |
 |---|---|---|
-| `db` | `postgres:16` | Postgres 16,首次启动自动跑 `schema_v1.sql`(9 表 + 3 视图 + INSERT 8 家 AI) |
+| `db` | `postgres:16` | Postgres 16,首次启动自动跑 `schema_v1.sql`(9 表 + 4 视图 + INSERT 8 家 AI) |
 | `web` | `ai-wcp-web` (自建,~285MB) | Next.js standalone,端口 3000 |
 | `cron` | `alpine:3` | 自建 scheduler,每 15min 调 `/api/cron/predict-l1` + `/api/cron/fetch-results` |
 | `tools` | `ai-wcp-tools` (自建,~560MB) | **按需启用**(`--profile setup`),包含完整 source + `tsx`,跑运维脚本 |
@@ -141,7 +141,7 @@ ai-fifa/
 ├── Dockerfile                  # 4 阶段:deps → build → runtime → tools
 ├── .dockerignore
 ├── .env.example                # 复制为 .env.local 后填值
-├── schema_v1.sql               # DB 真理源:9 表 + 3 视图 + 8 家 INSERT
+├── schema_v1.sql               # DB 真理源:9 表 + 4 视图 + 8 家 INSERT
 ├── wc2026_schedule.json        # 104 场赛程 + 12 组 × 4 队
 ├── poc_experiment_v5.html      # 概念验证(prompt 模板 / normalizeData 来源)
 │
@@ -161,7 +161,8 @@ ai-fifa/
 │   │   ├── request.ts
 │   │   └── navigation.ts       # 类型安全的 Link / useRouter,自动带 locale 前缀
 │   ├── components/
-│   │   └── LocaleSwitcher.tsx
+│   │   ├── LocaleSwitcher.tsx   # 原生 select dropdown(中文 / English,易扩展更多语言)
+│   │   └── LocalDateTime.tsx    # SSR fallback + 浏览器本地时区 toLocaleString
 │   ├── lib/
 │   │   ├── prisma.ts           # PrismaClient 单例(lazy + PrismaPg adapter)
 │   │   ├── ai-models.ts        # 8 家模型常量(id / openrouter ID / 品牌色)
@@ -180,11 +181,11 @@ ai-fifa/
 │   └── app/
 │       ├── globals.css         # Tailwind 4 @theme + 8 家 AI 品牌色变量
 │       ├── [locale]/           # 多语言路由
-│       │   ├── layout.tsx      # html + NextIntlClientProvider
-│       │   ├── page.tsx        # 首页:今日比赛 + Top3 积分
+│       │   ├── layout.tsx      # html + NextIntlClientProvider + 全局 LocaleSwitcher
+│       │   ├── page.tsx        # 首页:即将开赛 6 场 + AI 排行榜 Top 3
 │       │   ├── bracket/        # 赛程总览(小组赛 12 组 + 淘汰赛 6 阶段)
-│       │   ├── leaderboard/    # 积分榜
-│       │   └── match/[id]/     # 比赛详情(8 家预测卡)
+│       │   ├── leaderboard/    # AI 排行榜
+│       │   └── match/[id]/     # 比赛详情(8 家预测卡,双语 reason/wildcard)
 │       └── api/cron/
 │           ├── predict-l1/     # 每 ET 日 6h 前批量预测当天全部场次
 │           └── fetch-results/  # 拉 openfootball,upsert match_results,触发 scoring + ko_fill
@@ -215,8 +216,9 @@ ai-fifa/
 **表**:`ai_models` · `teams` · `matches` · `predictions_l1` · `predictions_l2` · `predictions_l3` · `match_results` · `prediction_scores` · `api_call_logs`
 
 **视图**:
-- `v_leaderboard` — 积分榜实时(直接 SELECT 渲染 `/leaderboard`)
-- `v_today_matches` — 首页查询窗口 `now-6h ~ now+24h`,自带 `is_disputed` 标记
+- `v_leaderboard` — AI 排行榜实时(直接 SELECT 渲染 `/leaderboard`)
+- `v_upcoming_matches` — **首页主查询**:所有 `kickoff_at > now() AND status <> 'finished'` 的比赛,带 `prediction_count` / `avg_confidence` / `is_disputed` / 双语队名
+- `v_today_matches` — 「今日窗口」(`now-6h ~ now+24h`),赛季中后期热点用
 - `v_model_reliability` — 7 天 API 成功率(<90% 触发告警阈值)
 
 **ID 约定**(都是 `text` 主键,不是 UUID):
@@ -266,7 +268,13 @@ ai-fifa/
 - **R32 含 Best 3rd 的 8 场自动填表** — FIFA 用固定 permutation lookup table 决定 8 个晋级 3rd 配给 8 个 R32 slot,留 TODO
 - **打脸海报模板** — 视觉方向待定(brief 优先级:中)
 - **单测框架** — 未引入
-- **AI 生成内容的多语言** — `reason` / `wildcard` 永远是中文(prompt 是中文,LLM 输出中文)。EN 版 UI 显示英文 + 中文 reason,可接受
+
+### 已完成的最近迭代
+
+- **双语 prompt(v1.1)** — AI 同一 prompt 同时输出 `reason_zh / reason_en / wildcard_zh / wildcard_en`,落库 4 列。前端按 locale 取值,v1.0 旧数据 fallback 到中文。**不绑死单一语言**且不破「8 家公平」基础。
+- **浏览器本地时区** — `<LocalDateTime>` 客户端组件,所有页面日期都按用户浏览器 TZ 显示。
+- **首页改即将开赛** — 不再依赖「今日 6h 窗口」,直接展示最近 6 场。
+- **全局语言切换** — 原生 dropdown,易扩展到 ja / es / pt 等更多 locale。
 
 ---
 
