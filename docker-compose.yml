@@ -25,7 +25,7 @@
 services:
   db:
     image: postgres:16
-    container_name: ai-fifa-db
+    container_name: ai-wcp-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
@@ -47,8 +47,8 @@ services:
       context: .
       dockerfile: Dockerfile
       target: runtime
-    image: ai-fifa-web:latest
-    container_name: ai-fifa-web
+    image: ai-wcp-web:latest
+    container_name: ai-wcp-web
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -65,7 +65,7 @@ services:
     # 自包含 scheduler — 不依赖 Vercel Cron / GitHub Actions / etc.
     # 每 15 min 调用一次预测 + 比分抓取端点
     image: alpine:3
-    container_name: ai-fifa-cron
+    container_name: ai-wcp-cron
     restart: unless-stopped
     env_file:
       - .env.local
@@ -99,8 +99,8 @@ services:
       context: .
       dockerfile: Dockerfile
       target: tools
-    image: ai-fifa-tools:latest
-    container_name: ai-fifa-tools
+    image: ai-wcp-tools:latest
+    container_name: ai-wcp-tools
     profiles: ["setup"]
     env_file:
       - .env.local

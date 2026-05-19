@@ -56,9 +56,9 @@ docker compose logs -f cron        # 看 cron sidecar 每 15min 调端点
 | 服务 | 镜像 | 角色 |
 |---|---|---|
 | `db` | `postgres:16` | Postgres 16,首次启动自动跑 `schema_v1.sql`(9 表 + 3 视图 + INSERT 8 家 AI) |
-| `web` | `ai-fifa-web` (自建,~285MB) | Next.js standalone,端口 3000 |
+| `web` | `ai-wcp-web` (自建,~285MB) | Next.js standalone,端口 3000 |
 | `cron` | `alpine:3` | 自建 scheduler,每 15min 调 `/api/cron/predict-l1` + `/api/cron/fetch-results` |
-| `tools` | `ai-fifa-tools` (自建,~560MB) | **按需启用**(`--profile setup`),包含完整 source + `tsx`,跑运维脚本 |
+| `tools` | `ai-wcp-tools` (自建,~560MB) | **按需启用**(`--profile setup`),包含完整 source + `tsx`,跑运维脚本 |
 
 ### 常用命令
 
