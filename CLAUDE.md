@@ -181,16 +181,16 @@ Dev only 查询参数(`NODE_ENV !== 'production'` 才生效):
 
 | 模型 | OpenRouter ID | 品牌色 |
 |---|---|---|
-| GPT-5 | `openai/gpt-5` | #10a37f |
+| GPT-5.5 | `openai/gpt-5.5` | #10a37f |
 | Claude Sonnet 4.6 | `anthropic/claude-sonnet-4.6` | #7F77DD |
-| Gemini 2.5 Pro | `google/gemini-2.5-pro` | #378ADD |
+| Gemini 3.5 Flash | `google/gemini-3.5-flash` | #378ADD |
 | Grok 4.3 | `x-ai/grok-4.3` | #888780 |
 | DeepSeek V4 Pro | `deepseek/deepseek-v4-pro` | #E24B4A |
 | Qwen 3.6 Plus | `qwen/qwen3.6-plus` | #EF9F27 |
-| Kimi K2.6 | `moonshotai/kimi-k2.6` | #D4537E |
+| GLM-5.1 | `z-ai/glm-5.1` | #504AF4 |
 | Llama 4 Maverick | `meta-llama/llama-4-maverick` | #639922 |
 
-全赛季 API 成本预算 ~$80-100。**实测发现** Kimi 在我们这类长 prompt 上稳定性差(成功率 25%),按 brief 设计在 UI 上展示成「😴 罢工」叙事。
+全赛季 API 成本预算 ~$80-100。**实测发现** 某些模型(早期 roster 里的 Kimi K2.6,成功率仅 25%,现已替换为 GLM-5.1)在我们这类长 prompt 上稳定性差,3 次重试仍失败时按 brief 设计在 UI 上展示成「😴 罢工」叙事 —— 这是产品叙事的一部分,不是 bug。
 
 ---
 
@@ -230,7 +230,7 @@ Dev only 查询参数(`NODE_ENV !== 'production'` 才生效):
 某家 AI 3 次都失败时,前端**不要静默隐藏**:
 
 > 😴 Claude 今日罢工
-> 🛠 GPT-5 维护中
+> 🛠 GPT-5.5 维护中
 
 用户会笑会截图。这是产品叙事的一部分(在 `src/app/[locale]/match/[id]/page.tsx` 的 `PredictionCard` 已实现:`prediction=null` 时显示「尚未预测」虚线卡)。
 
@@ -255,8 +255,8 @@ Dev only 查询参数(`NODE_ENV !== 'production'` 才生效):
 - 关键字段:`outcome` / `score_home` / `score_away` / `goals_over_under` / `btts` / `confidence` / `reason_zh` + `reason_en` / `wildcard_zh` + `wildcard_en`(v1.1 起双语)
 - `reason` 强制要求「**说一个别人不会说的理由**」— 实测能逼出差异化推理
 - `wildcard` = 「一个可能让预测翻车的意外因素」— 传播内容金矿
-- **双语 prompt(v1.1)**:同步要求中英两版,en 要地道不能机翻直译。输出 token 多 ~30-50%,Kimi 失败率可能进一步上升(本身就 75%),按设计走「罢工」UI 不补救
-- prompt 里加一句「**不要因为强队应该赢就盲目押热门**」— 给冷门倾向留空间(实测让 Kimi 押中沙特 2-1 阿根廷)
+- **双语 prompt(v1.1)**:同步要求中英两版,en 要地道不能机翻直译。输出 token 多 ~30-50%,不稳定的模型失败率可能进一步上升(早期 Kimi 本身就 75% 失败),按设计走「罢工」UI 不补救
+- prompt 里加一句「**不要因为强队应该赢就盲目押热门**」— 给冷门倾向留空间(POC 实测让当时的 Kimi 押中沙特 2-1 阿根廷)
 - 改 prompt 要同步升级 `PROMPT_VERSION` 字符串(便于追踪 raw_response)
 
 ---

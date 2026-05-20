@@ -1,7 +1,7 @@
 // OpenRouter client + 4 层重试 + JSON 容错解析 + 字段归一化。
 // 移植自 poc_experiment_v5.html(callModel / normalizeData)。
 // 关键约束(实测):
-//   - 不传 response_format(Kimi 等会报错)
+//   - 不传 response_format(部分模型会报错,POC 时 Kimi 即如此)
 //   - 靠 prompt 强制 JSON
 //   - 解析时剥离 markdown 包装,提取 { ... }
 //   - 字段名容错映射

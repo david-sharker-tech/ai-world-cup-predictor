@@ -5,24 +5,16 @@
 > 产品本质是**娱乐内容媒体站**(微博 / 小红书 / 知乎 / X 传播为主),核心目标是引流和传播 ——
 > AI 翻车越好玩越有流量,赛后「打脸海报」是核心传播素材。
 
-8 家 AI:**GPT-5** / **Claude Sonnet 4.6** / **Gemini 2.5 Pro** / **Grok 4.3** / **DeepSeek V4 Pro** /
-**Qwen 3.6 Plus** / **Llama 4 Maverick** / **Kimi K2.6**,统一通过 [OpenRouter](https://openrouter.ai) 一个 API 接入。
+8 家 AI:**GPT-5.5** / **Claude Sonnet 4.6** / **Gemini 3.5 Flash** / **Grok 4.3** / **DeepSeek V4 Pro** /
+**Qwen 3.6 Plus** / **Llama 4 Maverick** / **GLM-5.1**,统一通过 [OpenRouter](https://openrouter.ai) 一个 API 接入。
 
 ---
 
 ## 界面预览
 
-**首页** — 即将开赛的比赛 + AI 排行榜 TOP 3:
-
-![首页](docs/screenshots/home.png)
-
 **比赛详情** — 8 家 AI 对同一场的预测同台对比(比分 / 大小球 / 双进球 / 信心度 / 「翻车风险」):
 
 ![比赛详情](docs/screenshots/match.png)
-
-| 全赛程总览 | AI 排行榜 |
-|---|---|
-| ![赛程总览](docs/screenshots/bracket.png) | ![AI 排行榜](docs/screenshots/leaderboard.png) |
 
 > 各家 AI 使用[官方品牌 logo](https://github.com/lobehub/lobe-icons)(描述性引用,非商业背书)。
 
@@ -240,7 +232,7 @@ ai-fifa/
 - `v_model_reliability` — 7 天 API 成功率(<90% 触发告警阈值)
 
 **ID 约定**(都是 `text` 主键,不是 UUID):
-- `ai_models.id`:短标识 `'gpt'` / `'claude'` / `'gemini'` / `'grok'` / `'deepseek'` / `'qwen'` / `'llama'` / `'kimi'`
+- `ai_models.id`:短标识 `'gpt'` / `'claude'` / `'gemini'` / `'grok'` / `'deepseek'` / `'qwen'` / `'llama'` / `'glm'`
 - `teams.id`:FIFA 三字母代码 `'ARG'` / `'BRA'` / `'CHN'`
 - `matches.id`:`'M001'`-`'M104'`(与 schedule.json 对齐)
 - 预测表 / `prediction_scores`:UUID
@@ -293,6 +285,8 @@ ai-fifa/
 - **浏览器本地时区** — `<LocalDateTime>` 客户端组件,所有页面日期都按用户浏览器 TZ 显示。
 - **首页改即将开赛** — 不再依赖「今日 6h 窗口」,直接展示最近 6 场。
 - **全局语言切换** — 原生 dropdown,易扩展到 ja / es / pt 等更多 locale。
+- **官方品牌 logo** — 8 家 AI 的色块徽标换成 [lobe-icons](https://github.com/lobehub/lobe-icons) 官方 logo(`public/ai-logos/*.svg`),首页 / 排行榜标题用 lucide 奖杯图标。
+- **模型阵容更新** — GPT-5.5 / Gemini 3.5 Flash / GLM-5.1(替换原 Kimi K2.6)。换模型只需改 `ai-models.ts` + `schema_v1.sql` + DB `ai_models` 行,内部 `id` 不变则历史预测自动延续。
 
 ---
 

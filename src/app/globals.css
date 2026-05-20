@@ -14,7 +14,7 @@
   --color-ai-deepseek: #e24b4a;
   --color-ai-qwen: #ef9f27;
   --color-ai-llama: #639922;
-  --color-ai-kimi: #d4537e;
+  --color-ai-glm: #504af4;
 
   --color-outcome-home: #2e5e0e;
   --color-outcome-draw: #6b6b67;
@@ -36,7 +36,7 @@
   --color-ai-deepseek: var(--color-ai-deepseek);
   --color-ai-qwen: var(--color-ai-qwen);
   --color-ai-llama: var(--color-ai-llama);
-  --color-ai-kimi: var(--color-ai-kimi);
+  --color-ai-glm: var(--color-ai-glm);
 
   --color-outcome-home: var(--color-outcome-home);
   --color-outcome-draw: var(--color-outcome-draw);

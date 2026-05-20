@@ -423,14 +423,14 @@ COMMENT ON VIEW v_upcoming_matches IS '即将开赛(kickoff_at > now)的比赛 +
 -- ============================================================
 
 INSERT INTO ai_models (id, name, openrouter_id, persona_label, persona_quote, color_hex, country, founder) VALUES
-  ('gpt',      'GPT-5',             'openai/gpt-5',                '全能学长 · 永远押热门',         '历史数据显示主队近五场...',     '#10a37f', 'USA',   'Sam Altman'),
+  ('gpt',      'GPT-5.5',           'openai/gpt-5.5',              '全能学长 · 永远押热门',         '历史数据显示主队近五场...',     '#10a37f', 'USA',   'Sam Altman'),
   ('claude',   'Claude Sonnet 4.6', 'anthropic/claude-sonnet-4.6', '善于计算的工程男 · 推理最长',   '综合进攻效率、防守体系...',     '#7F77DD', 'USA',   'Dario Amodei'),
-  ('gemini',   'Gemini 2.5 Pro',    'google/gemini-2.5-pro',       '资源最多的全能选手 · 自信过头', '根据全面分析,毫无疑问...',      '#378ADD', 'USA',   'Sundar Pichai'),
+  ('gemini',   'Gemini 3.5 Flash',  'google/gemini-3.5-flash',     '资源最多的全能选手 · 自信过头', '根据全面分析,毫无疑问...',      '#378ADD', 'USA',   'Sundar Pichai'),
   ('grok',     'Grok 4.3',          'x-ai/grok-4.3',               '嘴臭天才 · 押冷门专业户',       '其他家都在说废话,我直说...',     '#888780', 'USA',   'Elon Musk'),
   ('deepseek', 'DeepSeek V4 Pro',   'deepseek/deepseek-v4-pro',    '沉默的黑马刺客 · 1/10 成本',    '(直接给结论,不解释)',           '#E24B4A', 'China', '梁文锋'),
   ('qwen',     'Qwen 3.6 Plus',     'qwen/qwen3.6-plus',           '卷王 · 偏爱亚洲球队',           '亚洲球队这次一定行...',         '#EF9F27', 'China', 'Alibaba'),
   ('llama',    'Llama 4 Maverick',  'meta-llama/llama-4-maverick', '开源平民英雄 · 10M 上下文',     '作为开源模型,我把分析全给你看', '#639922', 'Open',  'Mark Zuckerberg'),
-  ('kimi',     'Kimi K2.6',         'moonshotai/kimi-k2.6',        '编程天才少年 · 迷之自信',       '这场比赛会有惊喜,相信我!',     '#D4537E', 'China', '杨植麟');
+  ('glm',      'GLM-5.1',           'z-ai/glm-5.1',                '清华学院派 · 数据建模控',       '基于多维度数据建模,我的判断是…', '#504AF4', 'China', '张鹏');
 
 
 -- ============================================================
