@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **权威文档**:`/Users/david/Downloads/project_brief_v1.2.md`(AI 世界杯预测擂台 v1.2)。本文件仅摘录写代码时立即需要用到的部分(架构铁律、踩过的坑、模型 ID)。本文件与 brief 冲突时,**以 brief 为准**。
 >
-> **用户文档**:`README.md` — 启动 / 使用流程在那里,本文件不重复。
+> **用户文档**:`README.md`(英文)+ `README_CN.md`(中文)— 启动 / 使用流程在那里,本文件不重复。**两份是同一文档的双语版本,任何更新必须同步改两份。**
 
 ---
 
