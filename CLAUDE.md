@@ -190,7 +190,7 @@ Dev only 查询参数(`NODE_ENV !== 'production'` 才生效):
 | GLM-5.1 | `z-ai/glm-5.1` | #504AF4 |
 | Llama 4 Maverick | `meta-llama/llama-4-maverick` | #639922 |
 
-全赛季 API 成本预算 ~$80-100。**实测发现** 某些模型(早期 roster 里的 Kimi K2.6,成功率仅 25%,现已替换为 GLM-5.1)在我们这类长 prompt 上稳定性差,3 次重试仍失败时按 brief 设计在 UI 上展示成「😴 罢工」叙事 —— 这是产品叙事的一部分,不是 bug。
+全赛季 API 成本预算 ~$80-100。**实测发现** 某些模型(早期 roster 里的 Kimi K2.6,成功率仅 25%,现已替换为 GLM-5.1)在我们这类长 prompt 上稳定性差,3 次重试仍失败时按 brief 设计在 UI 上展示成「😴 罢工」叙事 —— 这是产品叙事的一部分,不是 bug。GLM-5.1 替换后实测 M001-M025 共 25 场 **25/25 全成功**(个别需 2 次重试),当前 roster 整体稳定。
 
 ---
 
@@ -263,7 +263,8 @@ Dev only 查询参数(`NODE_ENV !== 'production'` 才生效):
 
 ## 视觉规范
 
-- 各家 AI 使用**官方 Logo**(描述性引用,非商业背书)— 当前未实装
+- 各家 AI 使用**官方 Logo**(描述性引用,非商业背书)— 已实装:[lobe-icons](https://github.com/lobehub/lobe-icons) 静态 SVG 放在 `public/ai-logos/{id}.svg`,用 `<img>` 渲染(见 `AI_MODELS[].logo`)。换模型时同步换 logo;选 logo 认 **vendor 命名空间**(如 `z-ai/glm-5.1` 用 z.ai 的「Z」标,不是 ChatGLM 小象)。彩色版在白底不可见时(如 Kimi)退回 mono 版
+- 标题图标用 `lucide-react`(首页 / 排行榜的 `Trophy`)— RSC 友好,tree-shakable
 - 已结束:实线边框白底,显示真实比分
 - 预测中:虚线边框灰底,显示 % 置信度
 - 分歧场次:红色高亮 + ⚡
