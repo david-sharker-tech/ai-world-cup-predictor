@@ -4,9 +4,11 @@
 // 积分榜 = v_leaderboard 前 3 行
 
 import { getTranslations, setRequestLocale, getFormatter } from 'next-intl/server';
+import { Trophy } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { prisma } from '@/lib/prisma';
+import { MODELS_BY_ID, type AiModelId } from '@/lib/ai-models';
 import { LocalDateTime } from '@/components/LocalDateTime';
 
 export const dynamic = 'force-dynamic';
@@ -25,7 +27,10 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   return (
     <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-14 space-y-8 lg:space-y-12">
       <header>
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-1 lg:mb-2">🏆 {t('site.title')}</h1>
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-1 lg:mb-2 flex items-center gap-2 lg:gap-3">
+          <Trophy className="w-6 h-6 lg:w-8 lg:h-8 text-amber-500" strokeWidth={2} />
+          {t('site.title')}
+        </h1>
         <p className="text-sm lg:text-base text-muted-foreground max-w-2xl">{t('site.tagline')}</p>
       </header>
 
@@ -93,7 +98,16 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
             {top3.map((m, i) => (
               <li key={m.model_id} className="bg-white border border-border rounded-xl px-4 py-2.5 flex items-center gap-3">
                 <span className="text-sm font-semibold w-4 text-muted-foreground tabular-nums">{i + 1}</span>
-                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: m.color_hex }} />
+                {MODELS_BY_ID[m.model_id as AiModelId]?.logo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={MODELS_BY_ID[m.model_id as AiModelId].logo}
+                    alt={m.model_name}
+                    className="w-5 h-5 shrink-0"
+                  />
+                ) : (
+                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: m.color_hex }} />
+                )}
                 <span className="flex-1 text-sm truncate">{m.model_name}</span>
                 <span className="tabular-nums text-sm font-medium">
                   {Number(m.total_points)}{t('leaderboard.points_short')}

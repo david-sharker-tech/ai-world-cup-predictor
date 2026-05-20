@@ -10,6 +10,24 @@
 
 ---
 
+## 界面预览
+
+**首页** — 即将开赛的比赛 + AI 排行榜 TOP 3:
+
+![首页](docs/screenshots/home.png)
+
+**比赛详情** — 8 家 AI 对同一场的预测同台对比(比分 / 大小球 / 双进球 / 信心度 / 「翻车风险」):
+
+![比赛详情](docs/screenshots/match.png)
+
+| 全赛程总览 | AI 排行榜 |
+|---|---|
+| ![赛程总览](docs/screenshots/bracket.png) | ![AI 排行榜](docs/screenshots/leaderboard.png) |
+
+> 各家 AI 使用[官方品牌 logo](https://github.com/lobehub/lobe-icons)(描述性引用,非商业背书)。
+
+---
+
 ## 技术栈
 
 | 层 | 选型 |

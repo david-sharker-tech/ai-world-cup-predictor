@@ -21,7 +21,7 @@
     "disputed": "⚡ Disputed"
   },
   "leaderboard": {
-    "title": "🏆 AI Leaderboard",
+    "title": "AI Leaderboard",
     "rules": "Season total · Scoring: outcome +3 / exact score +5 / O-U +1 / BTTS +1 / perfect bonus +3 / upset hit ×1.5",
     "points_short": "pts",
     "accuracy": "Outcome accuracy",

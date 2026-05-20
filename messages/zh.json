@@ -21,7 +21,7 @@
     "disputed": "⚡ 分歧"
   },
   "leaderboard": {
-    "title": "🏆 AI 排行榜",
+    "title": "AI 排行榜",
     "rules": "赛季累计得分 · 评分规则:对 +3 / 比分全中 +5 / 大小球 +1 / 双进球 +1 / 四项全对额外 +3 / 押中冷门 ×1.5",
     "points_short": "分",
     "accuracy": "胜负准确率",

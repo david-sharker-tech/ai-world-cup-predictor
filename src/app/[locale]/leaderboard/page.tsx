@@ -2,9 +2,11 @@
 
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { Trophy } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { prisma } from '@/lib/prisma';
+import { MODELS_BY_ID, type AiModelId } from '@/lib/ai-models';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,7 +42,10 @@ export default async function LeaderboardPage({
     <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-14">
       <header className="mb-6 lg:mb-8">
         <Link href="/" className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground">← {t('nav.home')}</Link>
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold mt-2 mb-1">{t('leaderboard.title')}</h1>
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold mt-2 mb-1 flex items-center gap-2 lg:gap-3">
+          <Trophy className="w-6 h-6 lg:w-8 lg:h-8 text-amber-500" strokeWidth={2} />
+          {t('leaderboard.title')}
+        </h1>
         <p className="text-sm lg:text-base text-muted-foreground max-w-2xl">
           {t('leaderboard.rules')}
         </p>
@@ -55,7 +60,16 @@ export default async function LeaderboardPage({
             <span className="text-lg sm:text-xl lg:text-2xl font-semibold w-5 sm:w-6 lg:w-8 text-muted-foreground tabular-nums">
               {i + 1}
             </span>
-            <span className="w-3 h-3 rounded-full shrink-0" style={{ background: m.color_hex }} />
+            {MODELS_BY_ID[m.model_id as AiModelId]?.logo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={MODELS_BY_ID[m.model_id as AiModelId].logo}
+                alt={m.model_name}
+                className="w-6 h-6 shrink-0"
+              />
+            ) : (
+              <span className="w-3 h-3 rounded-full shrink-0" style={{ background: m.color_hex }} />
+            )}
             <div className="flex-1 min-w-0">
               <div className="text-sm sm:text-base font-medium truncate">{m.model_name}</div>
             </div>

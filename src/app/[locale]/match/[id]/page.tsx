@@ -191,7 +191,8 @@ function PredictionCard({ model, prediction, result, locale, t }: PredictionCard
       }`}
     >
       <header className="flex items-center gap-2 px-4 py-2.5 border-b border-border">
-        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: model.colorHex }} />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={model.logo} alt={model.name} className="w-5 h-5 shrink-0" />
         <span className="text-sm font-medium flex-1">{model.name}</span>
       </header>
 
